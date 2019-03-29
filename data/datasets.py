@@ -97,9 +97,9 @@ class GenerateDataset(object):
         """
         data = self.create_df(self.file_path)
         video_files = self.get_video_files(self.file_path, self.directory)
-        self._generator(data, num_items_per_class, self.directory, video_files, batch) 
+        self._generator(data, self.directory, video_files, batch) 
 
-    def _generator(self, data, num_items_per_class=None, directory=None, video_files=None, BATCH_SIZE = 64):
+    def _generator(self, data, directory=None, video_files=None, BATCH_SIZE = 64):
         
         '''
         retrieves the training batch for each iteration
@@ -135,18 +135,9 @@ class GenerateDataset(object):
 
                     # Appending them to existing batch
                     x_train = np.append(x_train, [video_frames], axis=0)
-                    y_train = np.append(y_train, [ data.loc[data['directory'] == "ABOUT"].values[0][0] ])
+                    y_train = np.append(y_train, [ data.loc[ data['directory'] == train[i].split('/')[-1].split('_')[-2] ].values[0][0] ])
                 
                 y_train = to_categorical(y_train, num_classes=NUM_CLASSES)
 
                 yield(x_train, y_train)
         
-# if __name__ == "__main__":
-#     video_files = get_video_files('/gdrive/My Drive/LibiumNet/lipread_mp4/', directory='train')
-#     data = create_df('/gdrive/My Drive/LibiumNet/lipread_mp4/')
-        
-#     gen_obj = generator(data=data, num_items_per_class=3, directory='train', video_files=video_files)
-#     t_x, t_y = next(gen_obj)
-
-#     print(t_x)
-#     print(t_y)
