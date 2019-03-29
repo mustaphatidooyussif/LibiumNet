@@ -10,8 +10,11 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, Activation, Dropout, Flatten, TimeDistributed, LSTM, Input
+from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 
 tf.enable_eager_execution()
+
+filepath= 'models/saved/weights.best.hdf5'
 
 class LibiumNet(object):
     """TA lipreading model, `LibiunNet`
@@ -79,3 +82,32 @@ class LibiumNet(object):
         :return: returns the predicted probailities
         """
         return self.model(input_batch)
+
+    def train(self, generator, steps_per_epoch=None, epochs=1, validation_data=None, validation_steps=None):
+        # Callbacks
+        checkpoint = ModelCheckpoint(
+                            filepath, monitor='val_acc', verbose=1, 
+                            save_best_only=True, mode='max'
+                    )
+        reduce_lr = ReduceLROnPlateau(
+                            monitor='val_acc', factor=0.2,
+                              patience=5, min_lr=0.001
+                    )
+        callbacks_list = [checkpoint, reduce_lr]
+
+        # compile model
+        self.model.compile(
+                optimizer=tf.train.AdamOptimizer(0.01),
+                loss='categorical_crossentropy',
+                metrics=['accuracy']
+        )
+
+        # fit model
+        print('Training...')
+        self.model.fit_generator(
+            generator, steps_per_epoch=steps_per_epoch,
+            epochs=epochs,callbacks=callbacks_list, 
+            validation_data=validation_data, 
+            validation_steps = validation_steps
+        )
+        

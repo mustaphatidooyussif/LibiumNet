@@ -28,6 +28,7 @@ class GenerateDataset(object):
     def __init__(self, file_path, directory):
         self.directory = directory
         self.file_path = file_path
+        self.num_samples = len(self.samples(self.get_video_files(self.file_path, self.directory)))
 
     def load_video(self, filename):
         """Loads the specified video using ffmpeg.
@@ -89,6 +90,17 @@ class GenerateDataset(object):
                     
         return d
         
+    def samples(self, video_files):
+        train = []
+        for key, value in video_files.items():
+            for file in value:
+                train.append(file)
+          
+        return train
+
+    def get_sample_size(self):
+        return self.num_samples
+
     def generator(self, num_items_per_class, batch = 64):
         """Interfaces the private generator method
 
